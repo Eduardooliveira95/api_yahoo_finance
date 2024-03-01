@@ -6,6 +6,7 @@ from pydantic import BaseModel
 
 
 class DadosAtivos(BaseModel):
+    nomeAtivo: str
     data: datetime
     abertura: float
     alta: float

@@ -26,10 +26,11 @@ class YahooService:
             dadosAtivo = DadosAtivos
             if dados.isBrasil:
                 aapl = yf.Ticker(ativo.nomeAtivo + '.SA').history(period=dados.periodo + 'mo')
-            else :
+            else:
                 aapl = yf.Ticker(ativo.nomeAtivo).history(period=dados.periodo+'mo')
             for index, row in aapl.iterrows():
                 dadosAtivo = DadosAtivos(
+                    nomeAtivo=ativo.nomeAtivo,
                     data=index.strftime('%Y-%m-%d'),
                     abertura=row['Open'],
                     alta=row['High'],
@@ -45,20 +46,14 @@ class YahooService:
 
     def buscarDadosFechamentoAtivos(self, dados: DadosUsuarioRequest, null=None, skip: int = 0, limit: int = 100) -> \
         List[DadosResponse]:
-        lista_de_ativos = dados.ativos
-        periodo: str = dados.periodo
-        dados: List[DadosResponse] = []
-        for ativo in lista_de_ativos:
-            dadosBolsa = DadosResponse(nome=ativo.nomeAtivo, indicadores=[])
-            aapl = yf.Ticker(ativo.nomeAtivo).history(period=periodo+'mo')
-            fechamentosBolsa = aapl['Close'].values
-            dataAcao = list(aapl['Close'].index)
-            dadosBolsa.nome = ativo.nomeAtivo
-            for valor, data in zip(fechamentosBolsa, dataAcao):
-                indicador = IndicadoresAtivo(data=data, valorFechamentoDia=valor)
-                dadosBolsa.indicadores.append(indicador)
-            dados.append(dadosBolsa)
-        return dados
+
+        dadosBrutos = self.buscaDadosAtivos(dados)
+        dadosRetorno: List[DadosResponse] = []
+        for dadosBusca in dadosBrutos:
+            indicador = IndicadoresAtivo(data=dadosBusca.data, valorFechamentoDia=dadosBusca.fechamento)
+            dadosBolsaTeste = DadosResponse(nome=dadosBusca.nomeAtivo, indicadores=[indicador])
+            dadosRetorno.append(dadosBolsaTeste)
+        return dadosRetorno
 
     def buscarDadosFechamentoAtivosExcel(self, dados, skip, limit) -> str:
         buscarDados = self.buscarDadosFechamentoAtivos(dados)

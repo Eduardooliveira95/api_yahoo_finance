@@ -18,3 +18,7 @@ async def buscar_dados(dados: DadosUsuarioRequest, skip: int = 0, limit: int = 1
 async def buscar_dados_excel(dados : DadosUsuarioRequest, skip : int = 0, limit : int = 10):
     excel = yahoo_service.buscarDadosFechamentoAtivosExcel(dados, skip=skip, limit=limit)
     return FileResponse(path=excel, media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+
+@router.get("/dadosFechamento/teste")
+async def teste(dados : DadosUsuarioRequest):
+    return yahoo_service.buscaDadosAtivos(dados)

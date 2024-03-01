@@ -46,7 +46,6 @@ class YahooService:
 
     def buscarDadosFechamentoAtivos(self, dados: DadosUsuarioRequest, null=None, skip: int = 0, limit: int = 100) -> \
         List[DadosResponse]:
-
         dadosBrutos = self.buscaDadosAtivos(dados)
         dadosRetorno: List[DadosResponse] = []
         for dadosBusca in dadosBrutos:
@@ -57,7 +56,16 @@ class YahooService:
 
     def buscarDadosFechamentoAtivosExcel(self, dados, skip, limit) -> str:
         buscarDados = self.buscarDadosFechamentoAtivos(dados)
-        df = pd.DataFrame(buscarDados)
+        datas = []
+        fechamentos = []
+        for dados in buscarDados:
+            for indicador in dados.indicadores:
+                datas.append(indicador.data)
+                fechamentos.append(indicador.valorFechamentoDia)
+
+        df = pd.DataFrame({"Datas": datas[0], "Fechamentos": fechamentos})
+        df = df.set_index("Datas", drop=True)
+
         dadosFechamentoBolsa = Path.home() / "Downloads" / "dados_fechamento_bolsa.xlsx"
         df.to_excel(dadosFechamentoBolsa, index=False)
         return str(dadosFechamentoBolsa)
